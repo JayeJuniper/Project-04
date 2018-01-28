@@ -79,16 +79,13 @@ def view_entry(entries):
                    ))
         print('n) next entry')
         print('d) delete entry')
-        print('q) return to main menu')
 
         next_action = None
 
         while next_action is None:
             next_action = input('Action: ').lower().strip()
-            if next_action == 'q':
-                break
 
-            elif next_action == 'd':
+            if next_action == 'd':
                 delete_entry(entry)
 
             elif next_action != 'n':
@@ -175,7 +172,7 @@ def find_by_employee():
     for entry in employees:
         print("{}) {}".format(employees.index(entry), str(entry)))
 
-    selection = test(len(employees))
+    selection = test_input(len(employees))
     return entries.where(Entry.employee.contains(employees[selection]))
 
 
@@ -193,7 +190,7 @@ def find_by_date():
         print("{}) {}".format(date.index(entry),
                               entry.strftime('%A %B %d, %Y %I:%Mp')))
 
-    selection = test(len(date))
+    selection = test_input(len(date))
     return entries.where(Entry.timestamp.contains(date[selection]))
 
 
@@ -210,7 +207,7 @@ def find_by_time_spent():
     for entry in duration:
         print("{}) {}".format(duration.index(entry), entry))
 
-    selection = test(len(duration))
+    selection = test_input(len(duration))
     return entries.where(Entry.duration.contains(duration[selection]))
 
 
@@ -218,19 +215,12 @@ def find_by_search_term():
     """Find by search term"""
     search_query = input("Enter a term to search database:\n> ")
     entries = Entry.select().order_by(Entry.timestamp.desc())
-    a = []
-    for entry in entries:
-        if re.search(entry.employee, search_query):
-            if entry not in a:
-                a.append(entry)
-        if re.search(entry.task_name, search_query):
-            if entry not in a:
-                a.append(entry)
-        if re.search(entry.notes, search_query):
-            if entry not in a:
-                a.append(entry)
-    return a
+    logs = entries.where(Entry.employee.contains(search_query)|
+                         Entry.task_name.contains(search_query)|
+                         Entry.notes.contains(search_query))
 
+    return logs
+    
 
 def delete_entry(entry):
     """Delete entry"""
@@ -240,7 +230,7 @@ def delete_entry(entry):
         input('Press ENTER to continue.')
 
 
-def test(length):
+def test_input(length):
     selection = None
     while selection is None:
         try:
